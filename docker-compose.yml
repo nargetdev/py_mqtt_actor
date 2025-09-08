@@ -12,3 +12,22 @@ services:
       - EMQX_NAME=emqx
       - EMQX_HOST=127.0.0.1
     restart: unless-stopped
+
+  function-based-actor:
+    build: .
+    container_name: function-based-actor
+    depends_on:
+      - emqx
+    environment:
+      - MQTT_BROKER=emqx
+      - MQTT_PORT=1883
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./prints:/app/prints
+    restart: unless-stopped
+    networks:
+      - mqtt-network
+
+networks:
+  mqtt-network:
+    driver: bridge

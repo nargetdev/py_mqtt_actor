@@ -1,0 +1,2 @@
+[console_scripts]
+mqtt-actor-example = py_mqtt_actor:main

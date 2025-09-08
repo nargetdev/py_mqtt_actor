@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: mqtt-actor
+Version: 0.1.0
+Summary: Generalized MQTT Actor Shim for PhotogrammetryWAAM
+Author: PhotogrammetryWAAM Team
+Keywords: mqtt,actor,pydantic,photogrammetry,waam
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+Requires-Dist: paho-mqtt>=1.6.0
+Requires-Dist: pydantic>=2.0.0
+
+# Actor model based on MQTT

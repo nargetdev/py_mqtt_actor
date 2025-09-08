@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 
 from mqtt_actor_shim import MQTTActorShim
-from pydantic_interface import TestObject
+from INTERFACE import TestObject
 
 
 def process_test_object(request_data: dict, request_id: str, actor_instance=None) -> dict:

@@ -22,10 +22,10 @@ command -v mosquitto_pub >/dev/null 2>&1 || {
   exit 127
 }
 
-BROKER=${1:-localhost}
+BROKER=${MQTT_BROKER:-localhost}
+PORT=${MQTT_PORT:-1883}
 RECIPIENT=${2:-ALL}
 SERVICE=${3:-test-object-printer}
-PORT=${4:-1883}
 PAYLOAD_FILE=${5:-}
 
 TOPIC="REQ/${RECIPIENT}/${SERVICE}"

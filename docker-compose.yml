@@ -25,9 +25,25 @@ services:
     volumes:
       - ./prints:/app/prints
     restart: unless-stopped
-    networks:
-      - mqtt-network
+    # networks:
+    #   - mqtt-network
 
-networks:
-  mqtt-network:
-    driver: bridge
+  test-function-based-actor:
+    image: eclipse-mosquitto:latest
+    container_name: test-function-based-actor
+    depends_on:
+      - emqx
+      - function-based-actor
+    environment:
+      - MQTT_BROKER=emqx
+      - MQTT_PORT=1883
+    volumes:
+      - ./prints:/app/prints
+      - ./tests/test_publish_message_request.sh:/test_publish_message_request.sh
+    entrypoint: ["/bin/sh", "/test_publish_message_request.sh"]
+    # Install mosquitto-clients at runtime for test script
+    restart: "no"
+
+# networks:
+#   mqtt-network:
+#     driver: bridge

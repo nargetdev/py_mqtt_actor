@@ -41,7 +41,7 @@ if [[ -n "${PAYLOAD_FILE}" ]]; then
   mosquitto_pub -h "${BROKER}" -p "${PORT}" -t "${TOPIC}" -f "${PAYLOAD_FILE}"
 else
   # Default valid TestObject payload
-  PAYLOAD='{"string_element":4,"priority":0.9,"simple_object":{"int_value":42,"bool_value":true}}'
+  PAYLOAD='{"string_element":"hello-from-cli","priority":0.9,"simple_object":{"int_value":42,"bool_value":true}}'
   echo "mosquitto_pub -h \"${BROKER}\" -p \"${PORT}\" -t \"${TOPIC}\" -m '${PAYLOAD}'"
   mosquitto_pub -h "${BROKER}" -p "${PORT}" -t "${TOPIC}" -m "${PAYLOAD}"
 fi

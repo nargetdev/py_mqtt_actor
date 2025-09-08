@@ -66,7 +66,8 @@ class MQTTActorShim(ABC):
         request_schema: Optional[Type[BaseModel]] = None,
         response_schema: Optional[Type[BaseModel]] = None,
         host_interface: str = "eth0",
-        log_level: str = "INFO"
+        log_level: str = "INFO",
+        process_function: Optional[Callable[[dict, str], dict]] = None
     ):
         """
         Initialize the MQTT Actor Shim.
@@ -79,6 +80,7 @@ class MQTTActorShim(ABC):
             response_schema: Pydantic model for validating outgoing responses
             host_interface: Network interface to use for hostname detection
             log_level: Logging level (DEBUG, INFO, WARNING, ERROR)
+            process_function: Optional function to process requests instead of subclass method
         """
         self.service_name = service_name
         self.mqtt_broker = mqtt_broker
@@ -86,6 +88,7 @@ class MQTTActorShim(ABC):
         self.request_schema = request_schema
         self.response_schema = response_schema
         self.host_interface = host_interface
+        self.process_function = process_function
         
         # Setup logging
         logging.basicConfig(
@@ -233,10 +236,9 @@ class MQTTActorShim(ABC):
             if request_id in self.active_requests:
                 del self.active_requests[request_id]
 
-    @abstractmethod
     def process_request(self, request_data: dict, request_id: str) -> dict:
         """
-        Process a request. Must be implemented by subclasses.
+        Process a request. Uses process_function if provided, otherwise must be implemented by subclasses.
         
         Args:
             request_data: Validated request data (dict)
@@ -248,7 +250,16 @@ class MQTTActorShim(ABC):
         Raises:
             Exception: Any exception will be caught and sent as an error response
         """
-        pass
+        if self.process_function:
+            # Check if the function accepts 3 arguments (including actor instance)
+            import inspect
+            sig = inspect.signature(self.process_function)
+            if len(sig.parameters) >= 3:
+                return self.process_function(request_data, request_id, self)
+            else:
+                return self.process_function(request_data, request_id)
+        else:
+            raise NotImplementedError("Either provide process_function or implement process_request in subclass")
 
     def publish_ack_response(self, request_id: str, request_data: dict):
         """Publish ACK response acknowledging receipt of request"""

@@ -1,0 +1,8 @@
+{
+  "string_element": "hello-from-cli",
+  "priority": 0.9,
+  "simple_object": {
+    "int_value": 42,
+    "bool_value": true
+  }
+}

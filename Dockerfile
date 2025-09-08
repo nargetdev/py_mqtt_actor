@@ -15,7 +15,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application files
-COPY mqtt_actor_shim.py .
+COPY py_mqtt_actor.py .
 COPY INTERFACE.py .
 COPY function-based-actor.py .
 

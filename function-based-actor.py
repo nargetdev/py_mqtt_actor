@@ -11,7 +11,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from mqtt_actor_shim import MQTTActorShim
+from py_mqtt_actor import MQTTActorShim
 from INTERFACE import TestObject
 
 

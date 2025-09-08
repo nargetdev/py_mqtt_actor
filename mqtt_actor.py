@@ -95,7 +95,7 @@ class MQTTActorShim(ABC):
             level=getattr(logging, log_level.upper()),
             format=f'%(asctime)s - {service_name} - %(levelname)s - %(message)s'
         )
-        self.logger = logging.getLogger(f"mqtt_actor.{service_name}")
+        self.logger = logging.getLogger(f"py_mqtt_actor.{service_name}")
         
         # Get hostname for topic routing
         self.hostname = self.get_hostname()

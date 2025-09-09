@@ -14,10 +14,10 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
-      interval: 10s
-      timeout: 5s
+      interval: 3s
+      timeout: 4s
       retries: 12
-      start_period: 60s
+      start_period: 20s
 
   function-based-actor:
     build:
@@ -43,7 +43,7 @@ services:
     depends_on:
       emqx:
         condition: service_healthy
-    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/#"]
+    entrypoint: ["mosquitto_sub", "-v", "-h", "emqx", "-t", "RESP/+/test-object-printer/+/+/JSON"]
     restart: unless-stopped
 
   emoji-resp-subscriber:
@@ -52,7 +52,7 @@ services:
     depends_on:
       emqx:
         condition: service_healthy
-    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/+/test-object-printer/+/+/EMOJI", "-v", "--debug"]
+    entrypoint: ["mosquitto_sub", "-v", "-h", "emqx", "-t", "RESP/+/test-object-printer/+/+/EMOJI"]
     restart: unless-stopped
 
   sync-subscriber:
@@ -61,7 +61,7 @@ services:
     depends_on:
       emqx:
         condition: service_healthy
-    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "SYNC/#"]
+    entrypoint: ["mosquitto_sub", "-v", "-h", "emqx", "-t", "SYNC/#"]
     restart: unless-stopped
 
 

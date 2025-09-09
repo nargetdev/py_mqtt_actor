@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Simple helper to publish a TestObject request to the test-object-printer actor
+# Simple helper to continuously publish a TestObject request to the test-object-printer actor every 2s
 # Defaults:
 #   broker: localhost
 #   recipient: ALL
@@ -30,17 +30,15 @@ PAYLOAD_FILE=${5:-}
 
 TOPIC="REQ/${RECIPIENT}/${SERVICE}"
 
-# echo "Publishing TestObject to topic: ${TOPIC} on ${BROKER}:${PORT}"
+# Retry logic: try up to 5 times with 2s delay between attempts
+MAX_ATTEMPTS=5
+SLEEP_BETWEEN=2
 
-if [[ -n "${PAYLOAD_FILE}" ]]; then
-  if [[ ! -f "${PAYLOAD_FILE}" ]]; then
-    echo "Payload file not found: ${PAYLOAD_FILE}" >&2
-    exit 1
-  fi
-  echo "mosquitto_pub -h \"${BROKER}\" -p \"${PORT}\" -t \"${TOPIC}\" -f \"${PAYLOAD_FILE}\""
-  mosquitto_pub -h "${BROKER}" -p "${PORT}" -t "${TOPIC}" -f "${PAYLOAD_FILE}"
-else
-  # Default valid TestObject payload
+
+echo "Starting to publish messages to topic '${TOPIC}' every 2 seconds. Press Ctrl+C to stop."
+
+while true; do
+    # Default valid TestObject payload
   PAYLOAD='{
     "string_element": "hello-from-cli",
     "priority": 0.9,
@@ -49,11 +47,8 @@ else
       "bool_value": true
     }
   }'
-  
   echo "mosquitto_pub -h \"${BROKER}\" -p \"${PORT}\" -t \"${TOPIC}\" -m '${PAYLOAD}'"
   mosquitto_pub -h "${BROKER}" -p "${PORT}" -t "${TOPIC}" -m "${PAYLOAD}"
-fi
-
-echo "Done."
-
-
+  echo "Published. Waiting 2s before next publish..."
+  sleep 2
+done

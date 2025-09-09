@@ -12,6 +12,12 @@ services:
       - EMQX_NAME=emqx
       - EMQX_HOST=127.0.0.1
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/opt/emqx/bin/emqx", "ctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
 
   function-based-actor:
     build:
@@ -19,7 +25,8 @@ services:
       dockerfile: example/Dockerfile
     container_name: function-based-actor
     depends_on:
-      - emqx
+      emqx:
+        condition: service_healthy
     environment:
       - MQTT_BROKER=emqx
       - MQTT_PORT=1883
@@ -34,7 +41,8 @@ services:
     image: eclipse-mosquitto:latest
     container_name: resp-subscriber
     depends_on:
-      - emqx
+      emqx:
+        condition: service_healthy
     entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/#"]
     restart: unless-stopped
 
@@ -42,7 +50,8 @@ services:
     image: eclipse-mosquitto:latest
     container_name: emoji-resp-subscriber
     depends_on:
-      - emqx
+      emqx:
+        condition: service_healthy
     entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/+/test-object-printer/+/+/EMOJI", "-v", "--debug"]
     restart: unless-stopped
 
@@ -50,7 +59,8 @@ services:
     image: eclipse-mosquitto:latest
     container_name: sync-subscriber
     depends_on:
-      - emqx
+      emqx:
+        condition: service_healthy
     entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "SYNC/#"]
     restart: unless-stopped
 
@@ -59,10 +69,14 @@ services:
     image: eclipse-mosquitto:latest
     container_name: test-function-based-actor
     depends_on:
-      - emqx
-      - function-based-actor
-      - resp-subscriber
-      - sync-subscriber
+      emqx:
+        condition: service_healthy
+      function-based-actor:
+        condition: service_started
+      resp-subscriber:
+        condition: service_started
+      sync-subscriber:
+        condition: service_started
     environment:
       - MQTT_BROKER=emqx
       - MQTT_PORT=1883

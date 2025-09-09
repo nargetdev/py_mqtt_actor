@@ -4,12 +4,14 @@ windows:
     layout: even-vertical
     panes:
       - shell_command:
-          - docker compose up emqx
+          - docker compose up --force-recreate emqx
       - shell_command:
-          - docker compose up function-based-actor
+          - docker compose up --force-recreate function-based-actor
       - shell_command:
-          - docker compose up test-function-based-actor
+          - docker compose up --force-recreate test-function-based-actor
       - shell_command:
-          - docker compose up resp-subscriber
+          - docker compose up --force-recreate resp-subscriber
       - shell_command:
-          - docker compose up sync-subscriber
+          - docker compose up --force-recreate sync-subscriber
+      - shell_command:
+        - docker compose up --force-recreate emoji-resp-subscriber

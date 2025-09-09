@@ -23,5 +23,5 @@ class TestObject(BaseModel):
 
 class ResponseObject(BaseModel):
     """Response object for the TestObject actor"""
-    status: int
+    status: str
     output_file: str

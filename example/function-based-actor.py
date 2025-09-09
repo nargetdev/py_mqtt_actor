@@ -47,7 +47,7 @@ def process_test_object(request_data: TestObject, request_id: str, actor_instanc
     
     # Return ResponseObject instance
     return ResponseObject(
-        status=200,
+        status="success",
         output_file=str(output_path)
     )
 

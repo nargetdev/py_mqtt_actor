@@ -21,6 +21,10 @@ export default defineConfig({
 					autogenerate: { directory: 'reference' },
 				},
 				{
+					label: 'Specifications',
+					autogenerate: { directory: 'spec' },
+				},
+				{
 					label: 'Floopy',
 					items: [
 						{ label: 'Floopy', slug: 'floopy/floopy' },

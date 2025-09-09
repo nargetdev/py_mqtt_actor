@@ -1,4 +1,8 @@
-# py_mqtt_actor Specification
+---
+title: py mqtt actor
+description: Component specification and documentation
+---
+
 
 ## Overview
 The `py_mqtt_actor` module provides a base class for creating MQTT-based actors that follow a standard request-response pattern. Actors subscribe to request topics, process requests in background threads, and publish both EMOJI and JSON responses.

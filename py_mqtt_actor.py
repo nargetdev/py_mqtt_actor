@@ -67,7 +67,7 @@ class MQTTActorShim(ABC):
         response_schema: Optional[Type[BaseModel]] = None,
         host_interface: str = "eth0",
         log_level: str = "INFO",
-        process_function: Optional[Callable[[dict, str], dict]] = None
+        process_function: Optional[Callable[..., dict]] = None
     ):
         """
         Initialize the MQTT Actor Shim.
@@ -241,7 +241,10 @@ class MQTTActorShim(ABC):
         Process a request. Uses process_function if provided, otherwise must be implemented by subclasses.
         
         Args:
-            request_data: Validated request data (dict)
+            request_data: Validated request data as dict. If the provided
+                process_function's first parameter is annotated with a
+                Pydantic BaseModel type, this method will instantiate that
+                model from request_data and pass the model instance instead.
             request_id: Unique identifier for this request
             
         Returns:
@@ -250,16 +253,50 @@ class MQTTActorShim(ABC):
         Raises:
             Exception: Any exception will be caught and sent as an error response
         """
-        if self.process_function:
-            # Check if the function accepts 3 arguments (including actor instance)
-            import inspect
-            sig = inspect.signature(self.process_function)
-            if len(sig.parameters) >= 3:
-                return self.process_function(request_data, request_id, self)
-            else:
-                return self.process_function(request_data, request_id)
-        else:
+        if not self.process_function:
             raise NotImplementedError("Either provide process_function or implement process_request in subclass")
+
+        import inspect
+        typed_arg = request_data
+        try:
+            signature = inspect.signature(self.process_function)
+            parameters = list(signature.parameters.values())
+            expects_actor_instance = len(parameters) >= 3
+
+            if parameters:
+                first_param = parameters[0]
+                annotation = first_param.annotation
+
+                # If the first param is annotated with a Pydantic model, instantiate it from the dict
+                if annotation is not inspect._empty:
+                    try:
+                        if isinstance(annotation, type) and issubclass(annotation, BaseModel):
+                            typed_arg = annotation(**request_data)
+                    except Exception:
+                        # Fallback to dict if instantiation fails
+                        typed_arg = request_data
+
+            if expects_actor_instance:
+                result = self.process_function(typed_arg, request_id, self)
+            else:
+                result = self.process_function(typed_arg, request_id)
+            
+            # Convert Pydantic model result to dict if needed
+            if isinstance(result, BaseModel):
+                return result.model_dump()
+            return result
+        except Exception:
+            # As a last resort, call with raw dict
+            try:
+                result = self.process_function(request_data, request_id)
+                if isinstance(result, BaseModel):
+                    return result.model_dump()
+                return result
+            except Exception:
+                result = self.process_function(request_data, request_id, self)
+                if isinstance(result, BaseModel):
+                    return result.model_dump()
+                return result
 
     def publish_ack_response(self, request_id: str, request_data: dict):
         """Publish ACK response acknowledging receipt of request"""

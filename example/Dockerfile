@@ -8,16 +8,17 @@ RUN apt-get update && apt-get install -y \
     mosquitto-clients \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
+# Copy the entire package (from project root context)
+COPY . /app/package
+WORKDIR /app/package
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the package in development mode
+RUN pip install --no-cache-dir -e .
 
-# Copy application files
-COPY py_mqtt_actor.py .
-COPY INTERFACE.py .
-COPY function-based-actor.py .
+# Copy example files to app directory
+WORKDIR /app
+COPY example/INTERFACE.py .
+COPY example/function-based-actor.py .
 
 # Create prints directory for output files
 RUN mkdir -p /app/prints
@@ -29,9 +30,6 @@ RUN chmod +x function-based-actor.py
 ENV PYTHONUNBUFFERED=1
 ENV MQTT_BROKER=emqx
 ENV MQTT_PORT=1883
-
-# Expose any ports if needed (MQTT client doesn't need exposed ports)
-# EXPOSE 1883
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

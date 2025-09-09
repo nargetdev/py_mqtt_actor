@@ -12,23 +12,23 @@ from datetime import datetime
 from pathlib import Path
 
 from py_mqtt_actor import MQTTActorShim
-from INTERFACE import TestObject
+from INTERFACE import TestObject, ResponseObject
 
 
-def process_test_object(request_data: dict, request_id: str, actor_instance=None) -> dict:
+def process_test_object(request_data: TestObject, request_id: str, actor_instance=None) -> ResponseObject:
     """
     Process a TestObject request by writing it to a JSON file.
     
     Args:
-        request_data: Validated request data (dict)
+        request_data: Validated TestObject instance
         request_id: Unique identifier for this request
         actor_instance: Optional MQTTActorShim instance for SYNC publishing
         
     Returns:
-        dict: Response data to be sent back to the client
+        ResponseObject: Response data to be sent back to the client
     """
-    # Create a Pydantic model instance (already validated by the shim)
-    model = TestObject(**request_data)
+    # The shim will pass a TestObject instance when annotated accordingly
+    model = request_data
     
     # Build a timestamped, request-specific filename
     output_dir = Path("./prints")
@@ -45,14 +45,11 @@ def process_test_object(request_data: dict, request_id: str, actor_instance=None
     if actor_instance:
         actor_instance.publish_sync_notice(output_path)
     
-    # Return information that will be merged into the RESULT payload
-    return {
-        "written": True,
-        "output_file": str(output_path),
-        "string_element": model.string_element,
-        "priority": model.priority,
-        "simple_object": model.simple_object.model_dump(),
-    }
+    # Return ResponseObject instance
+    return ResponseObject(
+        status=200,
+        output_file=str(output_path)
+    )
 
 
 def main() -> int:

@@ -8,26 +8,8 @@ windows:
       - shell_command:
           - docker compose up function-based-actor
       - shell_command:
-          - |
-            echo "Waiting for emqx to be ready..."
-            while not nc -z localhost 1883
-                sleep 2
-            end
-            echo "emqx is ready, starting mosquitto_sub for RESP/#"
-            docker compose up test-function-based-actor
+          - docker compose up test-function-based-actor
       - shell_command:
-          - |
-            echo "Waiting for emqx to be ready..."
-            while not nc -z localhost 1883
-                sleep 1
-            end
-            echo "emqx is ready, starting mosquitto_sub for RESP/#"
-            mosquitto_sub -t RESP/#
+          - docker compose up resp-subscriber
       - shell_command:
-          - |
-            echo "Waiting for emqx to be ready..."
-            while not nc -z localhost 1883
-                sleep 1
-            end
-            echo "emqx is ready, starting mosquitto_sub for SYNC/#"
-            mosquitto_sub -t SYNC/#
+          - docker compose up sync-subscriber

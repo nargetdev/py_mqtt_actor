@@ -20,3 +20,8 @@ class TestObject(BaseModel):
     string_element: str
     priority: float
     simple_object: SimpleObject
+
+class ResponseObject(BaseModel):
+    """Response object for the TestObject actor"""
+    status: int
+    output_file: str

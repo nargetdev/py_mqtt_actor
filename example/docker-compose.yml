@@ -14,7 +14,9 @@ services:
     restart: unless-stopped
 
   function-based-actor:
-    build: .
+    build:
+      context: ..
+      dockerfile: example/Dockerfile
     container_name: function-based-actor
     depends_on:
       - emqx
@@ -28,12 +30,39 @@ services:
     # networks:
     #   - mqtt-network
 
+  resp-subscriber:
+    image: eclipse-mosquitto:latest
+    container_name: resp-subscriber
+    depends_on:
+      - emqx
+    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/#"]
+    restart: unless-stopped
+
+  emoji-resp-subscriber:
+    image: eclipse-mosquitto:latest
+    container_name: emoji-resp-subscriber
+    depends_on:
+      - emqx
+    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "RESP/+/test-object-printer/+/+/EMOJI", "-v", "--debug"]
+    restart: unless-stopped
+
+  sync-subscriber:
+    image: eclipse-mosquitto:latest
+    container_name: sync-subscriber
+    depends_on:
+      - emqx
+    entrypoint: ["mosquitto_sub", "-h", "emqx", "-t", "SYNC/#"]
+    restart: unless-stopped
+
+
   test-function-based-actor:
     image: eclipse-mosquitto:latest
     container_name: test-function-based-actor
     depends_on:
       - emqx
       - function-based-actor
+      - resp-subscriber
+      - sync-subscriber
     environment:
       - MQTT_BROKER=emqx
       - MQTT_PORT=1883
@@ -43,7 +72,3 @@ services:
     entrypoint: ["/bin/sh", "/test_publish_message_request.sh"]
     # Install mosquitto-clients at runtime for test script
     restart: "no"
-
-# networks:
-#   mqtt-network:
-#     driver: bridge

@@ -6,19 +6,19 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mqtt-actor"
+name = "py_mqtt_actor"
 version = "0.1.0"
-description = "Generalized MQTT Actor Shim for PhotogrammetryWAAM"
+description = "Python actor paradigm implementation using MQTT and Pydantic"
 readme = "README.md"
 requires-python = ">=3.9"
 authors = [
-  { name = "PhotogrammetryWAAM Team" },
+  { name = "Nathan Argetsinger" },
 ]
 dependencies = [
   "paho-mqtt>=1.6.0",
   "pydantic>=2.0.0",
 ]
-keywords = ["mqtt", "actor", "pydantic", "photogrammetry", "waam"]
+keywords = ["mqtt", "actor", "pydantic", "asynchronous", "concurrency"]
 
 [project.scripts]
 mqtt-actor-example = "py_mqtt_actor:main"

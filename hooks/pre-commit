@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Git pre-commit hook to automatically sync documentation
+# This ensures docs are always up-to-date before commits
+
+# Get the project root
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
+# Check if any markdown files have changed
+if git diff --cached --name-only | grep -E '\.(md|mdx)$' > /dev/null; then
+    echo "📄 Markdown files detected in commit, syncing documentation..."
+    
+    # Run the sync script
+    if [ -f "$PROJECT_ROOT/sync-docs.sh" ]; then
+        "$PROJECT_ROOT/sync-docs.sh"
+        
+        # Add the synced files to the commit
+        git add "$PROJECT_ROOT/docs/starlight/src/content/docs/"
+        echo "✅ Documentation synced and added to commit"
+    else
+        echo "⚠️  Documentation sync script not found at $PROJECT_ROOT/sync-docs.sh"
+    fi
+fi
+
+# Check if any source files that might affect docs have changed
+if git diff --cached --name-only | grep -E '\.(py|spec\.md)$' > /dev/null; then
+    echo "🔧 Source files detected, syncing documentation..."
+    
+    # Run the sync script
+    if [ -f "$PROJECT_ROOT/sync-docs.sh" ]; then
+        "$PROJECT_ROOT/sync-docs.sh"
+        
+        # Add the synced files to the commit
+        git add "$PROJECT_ROOT/docs/starlight/src/content/docs/"
+        echo "✅ Documentation synced and added to commit"
+    else
+        echo "⚠️  Documentation sync script not found at $PROJECT_ROOT/sync-docs.sh"
+    fi
+fi

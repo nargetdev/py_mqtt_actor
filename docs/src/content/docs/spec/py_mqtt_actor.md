@@ -55,8 +55,11 @@ actor.start()
 ## 2. MQTT Topic Paradigm
 
 ### Request Topics (Incoming)
-- `REQ/ALL/{service_name}` - Broadcast requests to all instances
-- `REQ/{hostname}/{service_name}` - Targeted requests to specific host
+- `REQ/ALL/{service_name}/{?request_id}` - Broadcast requests to all instances
+- `REQ/{hostname}/{service_name}/{?request_id}` - Targeted requests to specific host
+
+**Note:** The `request_id` parameter in topic paths is optional. If not provided in the incoming request topic, the actor will automatically generate a unique request ID for tracking and response correlation.
+
 
 ### Response Topics (Outgoing)
 - `RESP/{hostname}/{service_name}/{request_id}/{stage}/{format}`
@@ -74,3 +77,19 @@ actor.start()
 **Dual Format Publishing:**
 - JSON responses contain structured data
 - EMOJI responses provide visual status indicators (📥 ✅ ❌ ⏳ 🚀 ⚙️ 🎉 ⏹️)
+
+
+# DEMO
+
+```sh
+cd example
+./DEMO.sh
+```
+
+Demo docs at ..
+
+at
+
+- [Floopy](/floopy/floopy/)
+- [demo](/floopy/demo)
+- [hola](/spec/hola)

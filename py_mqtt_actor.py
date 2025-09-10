@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
-Generalized MQTT Actor Shim
+# Generalized MQTT Actor Shim
+
+
+Astro Docs: http://localhost:4322/spec/py_mqtt_actor/
+
 
 This module provides a base class for creating MQTT-based actors that follow the
 standard request-response pattern used across the PhotogrammetryWAAM system.

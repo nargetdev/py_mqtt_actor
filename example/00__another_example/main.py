@@ -86,7 +86,7 @@ def main() -> int:
 
     try:
         actor = MQTTActorShim(
-            service_name="example-service",
+            service_name="example-service",  # Derives MQTT topics for REQ/{hostname}/{service_name}
             mqtt_broker=args.mqtt_broker,
             mqtt_port=args.mqtt_port,
             request_schema=ExampleRequest,

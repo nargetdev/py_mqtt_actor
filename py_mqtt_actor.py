@@ -6,11 +6,12 @@ This module provides a base class for creating MQTT-based actors that follow the
 standard request-response pattern used across the PhotogrammetryWAAM system.
 
 Each actor:
-1. Subscribes to REQ/{recipient}/{service_name} topics
+1. Subscribes to REQ/{recipient}/{service_name} topics (optionally with UUID: REQ/{recipient}/{service_name}/{uuid})
 2. Processes requests in background threads
-3. Publishes both EMOJI and JSON responses to RESP/{hostname}/{service_name}/{stage}/{format}
+3. Publishes both EMOJI and JSON responses to RESP/{hostname}/{service_name}/{request_id}/{stage}/{format}
 4. Handles errors consistently
 5. Supports both targeted and broadcast requests
+6. Uses provided UUID from request topic or generates one if not present
 
 Usage:
     class MyActor(MQTTActorShim):
@@ -102,8 +103,8 @@ class MQTTActorShim(ABC):
         
         # MQTT topics - REQ/RESP format
         self.request_topics = [
-            f"REQ/ALL/{self.service_name}",
-            f"REQ/{self.hostname}/{self.service_name}"
+            f"REQ/ALL/{self.service_name}/#",
+            f"REQ/{self.hostname}/{self.service_name}/#"
         ]
         
         # MQTT client setup
@@ -119,7 +120,7 @@ class MQTTActorShim(ABC):
         self.logger.info(f"Host interface: {self.host_interface}")
         self.logger.info(f"MQTT Broker: {mqtt_broker}:{mqtt_port}")
         self.logger.info(f"Will subscribe to: {', '.join(self.request_topics)}")
-        self.logger.info(f"Will respond on: RESP/{self.hostname}/{self.service_name}/{{stage}}/{{format}}")
+        self.logger.info(f"Will respond on: RESP/{self.hostname}/{self.service_name}/{{request_id}}/{{stage}}/{{format}}")
 
     def get_hostname(self) -> str:
         """Get the hostname of this device"""
@@ -161,13 +162,15 @@ class MQTTActorShim(ABC):
     def on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server"""
         try:
-            # Expected topic format: REQ/<recipient>/<service_name>
+            # Expected topic formats: 
+            # REQ/<recipient>/<service_name> or REQ/<recipient>/<service_name>/<uuid>
             topic_parts = msg.topic.split('/')
-            if len(topic_parts) != 3 or topic_parts[0] != "REQ" or topic_parts[2] != self.service_name:
+            if len(topic_parts) < 3 or len(topic_parts) > 4 or topic_parts[0] != "REQ" or topic_parts[2] != self.service_name:
                 self.logger.warning(f"Invalid topic format: {msg.topic}")
                 return
 
-            _, recipient, _service = topic_parts
+            _, recipient, _service = topic_parts[:3]
+            request_id = topic_parts[3] if len(topic_parts) == 4 else None
 
             # Check if this message is for us
             if recipient != "ALL" and recipient != self.hostname:
@@ -176,8 +179,12 @@ class MQTTActorShim(ABC):
 
             self.logger.info(f"Processing REQ '{msg.topic}' for recipient '{recipient}' (our hostname: {self.hostname})")
 
-            # Generate request ID if not present in topic
-            request_id = str(uuid.uuid4())[:8]
+            # Use provided request ID or generate one if not present
+            if request_id is None:
+                request_id = str(uuid.uuid4())[:8]
+                self.logger.debug(f"Generated request ID: {request_id}")
+            else:
+                self.logger.debug(f"Using provided request ID: {request_id}")
             
             # Parse the JSON message body
             try:

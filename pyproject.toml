@@ -29,4 +29,5 @@ py-modules = ["py_mqtt_actor"]
 [tool.uv.workspace]
 members = [
     "example",
+    "example/00__another_example",
 ]

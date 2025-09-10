@@ -1,0 +1,1 @@
+mosquitto_pub -t REQ/ALL/example-service/abc12345 -m '{"message": "test with custom UUID", "delay_seconds": 1}'

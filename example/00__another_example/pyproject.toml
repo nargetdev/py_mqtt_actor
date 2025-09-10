@@ -1,0 +1,12 @@
+[project]
+name = "00-another-example"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "py-mqtt-actor",
+]
+
+[tool.uv.sources]
+py-mqtt-actor = { path = "../../", editable = true }
